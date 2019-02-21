@@ -1,0 +1,14 @@
+- if session[:User] != nil
+    p = "Hello! " + session[:User]
+    form action="/logout" Method="POST" 
+        button type="Submit" Log out
+- else
+    h1 Login
+    form action="/login" Method="POST" 
+        input name="Username" type="text" placeholder="Username"
+        input name="Password" type="password" placeholder="Password"
+        input type="Submit" value="Login"
+        
+    a href="/new" class="button" Register
+    br 
+    a href="/guest" class="button" Guest
