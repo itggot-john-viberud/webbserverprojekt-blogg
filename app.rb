@@ -12,7 +12,7 @@ end
 post("/login") do
     db = SQLite3::Database.new("db/user.db")
     db.results_as_hash = true
-    result = db.execute("SELECT Username, Password, Authority FROM db WHERE Username = '#{params["Username"]}'")
+    result = db.execute("SELECT Username, Password FROM User WHERE Username = '#{params["Username"]}'")
     if BCrypt::Password.new(result[0]["Password"]) == params["Password"]
        session[:User] = params["Username"]
     else
@@ -40,10 +40,11 @@ post("/create") do
     db.results_as_hash = true
     new_name = params["Username"]
     new_password = params["Password1"]
+    new_mail = params["Mail"]
     
     if params["Password1"] == params["Password2"]
         new_password_hash = BCrypt::Password.create(new_password)
-        db.execute("INSERT INTO db (Username, Password, Authority) VALUES (?,?,?)", new_name, new_password_hash, 1)
+        db.execute("INSERT INTO User (Username, Password, Mail) VALUES (?,?,?)", new_name, new_password_hash, new_mail)
         redirect("/")
     else 
         redirect("/failed")
