@@ -1,3 +1,8 @@
 h1 woff
 
-p = session[:Posts]
+div class="wrapped"
+    - for posts in blogg do
+        section class="articles"
+        p class="Name" #{posts[0]}
+        p class="Name" #{posts[1]}
+        p class="Name" #{posts[2]}
