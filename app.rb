@@ -58,10 +58,10 @@ end
 get("/blogg") do
     db = SQLite3::Database.new("db/user.db")
     db.results_as_hash = true
-    user_Id = db.execute("SELECT Id FROM User WHERE Username = '#{session[:User]}'")
-    post_id = db.execute("SELECT PostId FROM User_Posts WHERE UserId = #{user_Id.first["Id"]}")
-    posts = db.execute("SELECT Rubrik, Bild, Text FROM Posts WHERE Id = #{post_Id.first["Id"]}")
-    byebug
+#    user_Id = db.execute("SELECT Id FROM User WHERE Username = '#{session[:User]}'")
+#    post_id = db.execute("SELECT PostId FROM User_Posts WHERE UserId = #{user_Id.first["Id"]}")
+    posts = db.execute("SELECT Rubrik, Bild, Text FROM Posts WHERE Creator = '#{session[:User]}'")
+    session[:Posts] = posts.first
     slim(:blogg, locals:{
         blogg: posts
     })
