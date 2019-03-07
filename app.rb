@@ -68,17 +68,17 @@ get("/blogg") do
 end
 
 post('/delete/:id') do
-    db = SQLite3::Database.new("db/empty.db")
+    db = SQLite3::Database.new("db/user.db")
     db.results_as_hash = true
+    id = params["id"]
 
-    query = "DELETE FROM Posts WHERE Id=#{params["id"]}"
-    result_new = db.execute(query)
+    result_new = db.execute("DELETE FROM Posts WHERE Id=?", id)
 
     redirect('/blogg')
 end
 
 post('/edit_execute/:id') do
-    db = SQLite3::Database.new("db/empty.db")
+    db = SQLite3::Database.new("db/user.db")
     db.results_as_hash = true
     new_name = params["name"]
     new_email = params["email"]
