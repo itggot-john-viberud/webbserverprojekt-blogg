@@ -3,6 +3,14 @@ h1 woff
 div class="wrapped"
     - for posts in blogg do
         section class="articles"
-        p class="Name" #{posts[0]}
-        p class="Name" #{posts[1]}
-        p class="Name" #{posts[2]}
+            article
+                div class="controls"
+                    form action="/edit/#{posts[""]}" method="GET" 
+                        button type="submit" value="edit"
+                            i class="material-icons" edit
+                    form action="/delete/#{session[:User["Id"]]}" method="POST" 
+                        button type="submit" value="delete" 
+                            i class="material-icons" delete
+                p class="Name" #{posts[0]}
+                p class="Name" #{posts[1]}
+                p class="Name" #{posts[2]}
