@@ -1,14 +1,16 @@
 h1 woff
 
 div class="wrapped"
+    a href="/create_post" 
+        p Create User
     - for posts in blogg do
         section class="articles"
             article
                 div class="controls"
-                    form action="/edit/#{posts[""]}" method="GET" 
+                    form action="/edit/#{posts["Id"]}" method="GET" 
                         button type="submit" value="edit"
                             i class="material-icons" edit
-                    form action="/delete/#{session[:User["Id"]]}" method="POST" 
+                    form action="/delete/#{posts["Id"]}" method="POST" 
                         button type="submit" value="delete" 
                             i class="material-icons" delete
                 p class="Name" #{posts[0]}

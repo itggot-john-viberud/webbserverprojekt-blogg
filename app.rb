@@ -34,7 +34,9 @@ get("/failed") do
         slim(:failed)
     end
 end
-
+get("/new") do
+    slim(:new)
+end
 post("/create") do
     db = SQLite3::Database.new("db/user.db")
     db.results_as_hash = true
@@ -51,16 +53,13 @@ post("/create") do
     end
 end 
 
-get("/new") do
-    slim(:new)
-end
 
 get("/blogg") do
     db = SQLite3::Database.new("db/user.db")
     db.results_as_hash = true
 #    user_Id = db.execute("SELECT Id FROM User WHERE Username = '#{session[:User]}'")
 #    post_id = db.execute("SELECT PostId FROM User_Posts WHERE UserId = #{user_Id.first["Id"]}")
-    posts = db.execute("SELECT Rubrik, Bild, Text FROM Posts WHERE Creator = '#{session[:User]}'")
+    posts = db.execute("SELECT Rubrik, Bild, Text, Id FROM Posts WHERE Creator = '#{session[:User]}'")
     session[:Posts] = posts.first
     slim(:blogg, locals:{
         blogg: posts
@@ -68,3 +67,45 @@ get("/blogg") do
 
 end
 
+post('/delete/:id') do
+    db = SQLite3::Database.new("db/empty.db")
+    db.results_as_hash = true
+
+    query = "DELETE FROM Posts WHERE Id=#{params["id"]}"
+    result_new = db.execute(query)
+
+    redirect('/blogg')
+end
+
+post('/edit_execute/:id') do
+    db = SQLite3::Database.new("db/empty.db")
+    db.results_as_hash = true
+    new_name = params["name"]
+    new_email = params["email"]
+    new_tel = params["tel"]
+    new_dep = params["department"]
+    id = params["EmployeeId"]
+
+    result_new = db.execute("UPDATE posts
+        SET Rubrik = '?', Bild = '?', Text = '?', Creator = '?'
+        WHERE Id = 'id'",
+        new_rubrik, new_bild, new_tel, new_dep, id)
+
+    redirect('/blogg')
+end
+
+
+post("/new_post") do
+    db = SQLite3::Database.new("db/user.db")
+    db.results_as_hash = true
+    new_rubrik = params["Rubrik"]
+    new_bild = params["Bild"]
+    new_text = params["Text"]
+    creator = session[:User]
+    db.execute("INSERT INTO Posts (Rubrik, Bild, Text, Creator) VALUES (?,?,?,?)", new_rubrik, new_bild, new_text, creator)
+    redirect("/blogg")
+end 
+
+get("/create_post") do
+    slim(:create_post)
+end
