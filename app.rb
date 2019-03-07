@@ -77,19 +77,28 @@ post('/delete/:id') do
     redirect('/blogg')
 end
 
+get("/edit/:id") do
+    db = SQLite3::Database.new("db/user.db")
+    db.results_as_hash = true
+    id = params["id"]
+    result = db.execute("SELECT * FROM posts WHERE Id=?", id)
+
+    slim(:edit, locals:{
+        posts: result.first})
+end
+
 post('/edit_execute/:id') do
     db = SQLite3::Database.new("db/user.db")
     db.results_as_hash = true
-    new_name = params["name"]
-    new_email = params["email"]
-    new_tel = params["tel"]
-    new_dep = params["department"]
-    id = params["EmployeeId"]
+    new_rubrik = params["Rubrik"]
+    new_bild = params["Bild"]
+    new_text = params["Text"]
+    id = params["Id"]
 
     result_new = db.execute("UPDATE posts
-        SET Rubrik = '?', Bild = '?', Text = '?', Creator = '?'
-        WHERE Id = 'id'",
-        new_rubrik, new_bild, new_tel, new_dep, id)
+        SET Rubrik = '?', Bild = '?', Text = '?'
+        WHERE Id = '?'",
+        new_rubrik, new_bild, new_text, id)
 
     redirect('/blogg')
 end

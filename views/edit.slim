@@ -1,0 +1,8 @@
+div class="wrapper"
+    form action="/edit_execute/#{posts["Id"]}" method="POST"
+        article
+            div class="info" 
+                input name="Rubrik" placeholder="Rubrik" type="text" value="#{posts[1]}"
+                input name="Bild" placeholder="Bild" type="text" value="#{posts[2]}"
+                input name="Text" placeholder="Text" type="text" value="#{posts[3]}"
+                input type="submit" value="Update"
