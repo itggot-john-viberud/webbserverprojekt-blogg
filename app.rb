@@ -93,11 +93,14 @@ post('/edit_execute/:id') do
     new_rubrik = params["Rubrik"]
     new_bild = params["Bild"]
     new_text = params["Text"]
-    id = params["Id"]
+    id = params["id"]
+    if new_bild.length == 0
+        new_bild = " "
+    end
 
     result_new = db.execute("UPDATE posts
-        SET Rubrik = '?', Bild = '?', Text = '?'
-        WHERE Id = '?'",
+        SET Rubrik = ?, Bild = ?, Text = ?
+        WHERE Id = ?",
         new_rubrik, new_bild, new_text, id)
 
     redirect('/blogg')
