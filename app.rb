@@ -12,7 +12,7 @@ end
 post("/login") do
     db = SQLite3::Database.new("db/user.db")
     db.results_as_hash = true
-    result = db.execute("SELECT Username, Password FROM User WHERE Username = '#{params["Username"]}'")
+    result = db.execute("SELECT Username, Password FROM user WHERE Username = '#{params["Username"]}'")
     if BCrypt::Password.new(result[0]["Password"]) == params["Password"]
        session[:User] = params["Username"]
     else
@@ -44,7 +44,7 @@ post("/create") do
     
     if params["Password1"] == params["Password2"]
         new_password_hash = BCrypt::Password.create(new_password)
-        db.execute("INSERT INTO User (Username, Password, Mail) VALUES (?,?,?)", new_name, new_password_hash, new_mail)
+        db.execute("INSERT INTO user (Username, Password, Mail) VALUES (?,?,?)", new_name, new_password_hash, new_mail)
         redirect("/")
     else 
         redirect("/failed")
@@ -57,7 +57,7 @@ get("/blogg") do
     db.results_as_hash = true
 #    user_Id = db.execute("SELECT Id FROM User WHERE Username = '#{session[:User]}'")
 #    post_id = db.execute("SELECT PostId FROM User_Posts WHERE UserId = #{user_Id.first["Id"]}")
-    posts = db.execute("SELECT Rubrik, Bild, Text, Id FROM Posts WHERE Creator = '#{session[:User]}'")
+    posts = db.execute("SELECT Rubrik, Bild, Text, Id FROM posts WHERE Creator = '#{session[:User]}'")
     session[:Posts] = posts.first
     slim(:blogg, locals:{
         blogg: posts
@@ -70,7 +70,7 @@ post('/delete/:id') do
     db.results_as_hash = true
     id = params["id"]
 
-    result_new = db.execute("DELETE FROM Posts WHERE Id=?", id)
+    result_new = db.execute("DELETE FROM posts WHERE Id=?", id)
 
     redirect('/blogg')
 end
@@ -80,9 +80,13 @@ get("/edit/:id") do
     db.results_as_hash = true
     id = params["id"]
     result = db.execute("SELECT * FROM posts WHERE Id=?", id)
-
-    slim(:edit, locals:{
-        posts: result.first})
+    who_is_it = db.execute("SELECT Creator FROM posts WHERE Id = ?", id)
+    if who_is_it.first[0] == session[:User]
+        slim(:edit, locals:{
+            posts: result.first})
+    else
+        redirect('/failed')
+    end        
 end
 
 post('/edit_execute/:id') do
@@ -95,7 +99,7 @@ post('/edit_execute/:id') do
     if new_bild.length == 0
         new_bild = " "
     end
-    who_is_it = db.execute("SELECT Creator FROM Posts WHERE Id = ?", id)
+    who_is_it = db.execute("SELECT Creator FROM posts WHERE Id = ?", id)
     if session[:User] == who_is_it.first[0]
         result_new = db.execute("UPDATE posts
             SET Rubrik = ?, Bild = ?, Text = ?
@@ -116,7 +120,7 @@ post("/new_post") do
     new_bild = params["Bild"]
     new_text = params["Text"]
     creator = session[:User]
-    db.execute("INSERT INTO Posts (Rubrik, Bild, Text, Creator) VALUES (?,?,?,?)", new_rubrik, new_bild, new_text, creator)
+    db.execute("INSERT INTO posts (Rubrik, Bild, Text, Creator) VALUES (?,?,?,?)", new_rubrik, new_bild, new_text, creator)
     redirect("/blogg")
 end 
 
