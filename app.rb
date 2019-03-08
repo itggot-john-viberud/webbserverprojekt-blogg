@@ -30,9 +30,7 @@ post("/logout") do
 end
 
 get("/failed") do
-    if login == false
-        slim(:failed)
-    end
+    slim(:failed)
 end
 get("/new") do
     slim(:new)
@@ -97,11 +95,15 @@ post('/edit_execute/:id') do
     if new_bild.length == 0
         new_bild = " "
     end
-
-    result_new = db.execute("UPDATE posts
-        SET Rubrik = ?, Bild = ?, Text = ?
-        WHERE Id = ?",
-        new_rubrik, new_bild, new_text, id)
+    who_is_it = db.execute("SELECT Creator FROM Posts WHERE Id = ?", id)
+    if session[:User] == who_is_it.first[0]
+        result_new = db.execute("UPDATE posts
+            SET Rubrik = ?, Bild = ?, Text = ?
+            WHERE Id = ?",
+            new_rubrik, new_bild, new_text, id)
+    else
+        redirect('/failed')
+    end
 
     redirect('/blogg')
 end
