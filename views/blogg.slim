@@ -1,8 +1,9 @@
 h1 woff
 
 div class="wrapped"
-    a href="/create_post" 
-        p Create Post
+    a href="/create_post"
+        - if session[:User] != "guest" 
+            p Create Post
     - for posts in blogg do
         section class="articles"
             article
