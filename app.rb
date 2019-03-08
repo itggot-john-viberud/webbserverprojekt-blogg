@@ -77,11 +77,19 @@ get("/blogg/:username") do
     db.results_as_hash = true
     posts = db.execute("SELECT Rubrik, Bild, Text, Id FROM posts WHERE Creator = '#{params["username"]}'")
     session[:User] = "guest"
-    session[:Posts] = posts.first
+    session[:Posts] = posts.first 
+    session[:bloggare] = params["username"]
     slim(:blogg, locals:{
         blogg: posts
     })
 
+end
+get("/about/:username") do
+    db = SQLite3::Database.new("db/user.db")
+    db.results_as_hash = true
+    bloggare = params["username"]
+    result = db.execute("SELECT * FROM om WHERE Creator=?", bloggare)
+    slim(:about)       
 end
 
 post('/delete/:id') do
