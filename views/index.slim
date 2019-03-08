@@ -11,4 +11,9 @@
         
     a href="/new" class="button" Register
     br 
-    a href="/guest" class="button" Guest
+    div class="dropdown"
+        button class="dropbtn" Bloggare
+        div class="dropdown-content"
+            - for namn in skapare do
+                a href="/blogg/#{namn["Username"]}" #{namn["Username"]}
+ 

@@ -6,7 +6,12 @@ require 'byebug'
 enable :sessions
 
 get("/") do
-    slim(:index)
+    db = SQLite3::Database.new("db/user.db")
+    db.results_as_hash = true
+    namn = db.execute("SELECT Username FROM user")
+    slim(:index, locals:{
+        skapare: namn
+    })
 end
 
 post("/login") do
@@ -17,6 +22,9 @@ post("/login") do
        session[:User] = params["Username"]
     else
         login == false
+    end
+    if session[:User]
+
     end
     slim(:index, locals:{
         index: result
@@ -58,6 +66,17 @@ get("/blogg") do
 #    user_Id = db.execute("SELECT Id FROM User WHERE Username = '#{session[:User]}'")
 #    post_id = db.execute("SELECT PostId FROM User_Posts WHERE UserId = #{user_Id.first["Id"]}")
     posts = db.execute("SELECT Rubrik, Bild, Text, Id FROM posts WHERE Creator = '#{session[:User]}'")
+    session[:Posts] = posts.first
+    slim(:blogg, locals:{
+        blogg: posts
+    })
+
+end
+get("/blogg/:username") do
+    db = SQLite3::Database.new("db/user.db")
+    db.results_as_hash = true
+    posts = db.execute("SELECT Rubrik, Bild, Text, Id FROM posts WHERE Creator = '#{params["username"]}'")
+    session[:User] = "guest"
     session[:Posts] = posts.first
     slim(:blogg, locals:{
         blogg: posts
