@@ -5,6 +5,27 @@ require 'bcrypt'
 require 'byebug'
 enable :sessions
 
+configure do
+    set :secured_paths, ['/edit', '/delete', '/new_post']
+end
+
+before do
+    if settings.secured_paths.any? { |elem| request.path.start_with?(elem) } 
+        if session[:user]
+        else
+            halt 403
+        end
+    end
+end
+
+error 403 do
+    "Forbidden dude"
+end
+
+error 404 do
+    "muuu"
+end
+
 get("/") do
     db = SQLite3::Database.new("db/user.db")
     db.results_as_hash = true
@@ -19,17 +40,11 @@ post("/login") do
     db.results_as_hash = true
     result = db.execute("SELECT Username, Password FROM user WHERE Username = '#{params["Username"]}'")
     if BCrypt::Password.new(result[0]["Password"]) == params["Password"]
-       session[:User] = params["Username"]
+       session[:user] = params["Username"]
+       redirect("/blogg/"+params["Username"])
     else
-        login == false
+        redirect("/failed")
     end
-    if session[:User]
-
-    end
-    slim(:index, locals:{
-        index: result
-    })
-    redirect("/blogg")
 end
 
 post("/logout") do
@@ -65,8 +80,8 @@ get("/blogg") do
     db.results_as_hash = true
 #    user_Id = db.execute("SELECT Id FROM User WHERE Username = '#{session[:User]}'")
 #    post_id = db.execute("SELECT PostId FROM User_Posts WHERE UserId = #{user_Id.first["Id"]}")
-    posts = db.execute("SELECT Rubrik, Bild, Text, Id FROM posts WHERE Creator = '#{session[:User]}'")
-    session[:Posts] = posts.first
+    posts = db.execute("SELECT Rubrik, Bild, Text, Id FROM posts WHERE Creator = '#{session[:user]}'")
+    session[:posts] = posts.first
     slim(:blogg, locals:{
         blogg: posts
     })
@@ -75,9 +90,13 @@ end
 get("/blogg/:username") do
     db = SQLite3::Database.new("db/user.db")
     db.results_as_hash = true
-    posts = db.execute("SELECT Rubrik, Bild, Text, Id FROM posts WHERE Creator = '#{params["username"]}'")
-    session[:User] = "guest"
-    session[:Posts] = posts.first 
+    if session[:user].nil? 
+        session[:user] = "guest"
+        posts = db.execute("SELECT Rubrik, Bild, Text, Id FROM posts WHERE Creator = '#{params["username"]}'")
+    else
+        posts = db.execute("SELECT Rubrik, Bild, Text, Id FROM posts WHERE Creator = '#{session[:user]}'")
+    end
+    session[:posts] = posts.first 
     session[:bloggare] = params["username"]
     slim(:blogg, locals:{
         blogg: posts
@@ -108,7 +127,7 @@ get("/edit/:id") do
     id = params["id"]
     result = db.execute("SELECT * FROM posts WHERE Id=?", id)
     who_is_it = db.execute("SELECT Creator FROM posts WHERE Id = ?", id)
-    if who_is_it.first[0] == session[:User]
+    if who_is_it.first[0] == session[:user]
         slim(:edit, locals:{
             posts: result.first})
     else
@@ -127,7 +146,7 @@ post('/edit_execute/:id') do
         new_bild = " "
     end
     who_is_it = db.execute("SELECT Creator FROM posts WHERE Id = ?", id)
-    if session[:User] == who_is_it.first[0]
+    if session[:user] == who_is_it.first[0]
         result_new = db.execute("UPDATE posts
             SET Rubrik = ?, Bild = ?, Text = ?
             WHERE Id = ?",
@@ -146,9 +165,13 @@ post("/new_post") do
     new_rubrik = params["Rubrik"]
     new_bild = params["Bild"]
     new_text = params["Text"]
-    creator = session[:User]
-    db.execute("INSERT INTO posts (Rubrik, Bild, Text, Creator) VALUES (?,?,?,?)", new_rubrik, new_bild, new_text, creator)
-    redirect("/blogg")
+    if session[:user]
+        creator = session[:user]
+        db.execute("INSERT INTO posts (Rubrik, Bild, Text, Creator) VALUES (?,?,?,?)", new_rubrik, new_bild, new_text, creator)
+    else
+        redirect('/failed')
+    end
+    redirect('/blogg')
 end 
 
 get("/create_post") do

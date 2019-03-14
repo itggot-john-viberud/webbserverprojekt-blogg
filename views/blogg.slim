@@ -1,5 +1,5 @@
 div class="wrapped"
-    - if session[:User] != "guest" 
+    - if session[:user] != "guest" 
         a href="/create_post"
             p Create Post
     a href="/about/#{session[:bloggare]}"
@@ -9,7 +9,7 @@ div class="wrapped"
         section class="articles"
             article
                 div class="controls"
-                    - if session[:User] != "guest"
+                    - if session[:user] != "guest"
                         form action="/edit/#{posts["Id"]}" method="GET" 
                             button type="submit" value="edit"
                                 i class="material-icons" edit
