@@ -163,15 +163,23 @@ post("/new_post") do
     db = SQLite3::Database.new("db/user.db")
     db.results_as_hash = true
     new_rubrik = params["Rubrik"]
-    new_bild = params["Bild"]
+    @filename = params[:file][:filename]
+    file = params[:file][:tempfile]
+    @file_name = SecureRandom.hex(10)
+    oof = @filename.split('.')
+    @file_name <<'.'
+    @file_name << oof[1]
+    File.open("./public/img/#{@file_name}", 'wb') do |f|
+        f.write(file.read)
+    end
     new_text = params["Text"]
     if session[:user]
         creator = session[:user]
-        db.execute("INSERT INTO posts (Rubrik, Bild, Text, Creator) VALUES (?,?,?,?)", new_rubrik, new_bild, new_text, creator)
+        db.execute("INSERT INTO posts (Rubrik, Bild, Text, Creator) VALUES (?,?,?,?)", new_rubrik, @file_name, new_text, creator)
     else
         redirect('/failed')
     end
-    redirect('/blogg')
+    redirect('/blogg/:username')
 end 
 
 get("/create_post") do
